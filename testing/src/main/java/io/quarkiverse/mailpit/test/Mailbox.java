@@ -18,6 +18,7 @@ import io.quarkiverse.mailpit.test.model.*;
 import io.quarkiverse.mailpit.test.rest.ApplicationApi;
 import io.quarkiverse.mailpit.test.rest.MessageApi;
 import io.quarkiverse.mailpit.test.rest.MessagesApi;
+import io.quarkiverse.mailpit.test.rest.TestingApi;
 
 /**
  * Injected MailContext wrapping the API to Mailpit for unit testing.
@@ -27,6 +28,7 @@ public class Mailbox {
     private ApplicationApi applicationApi;
     private MessagesApi messagesApi;
     private MessageApi messageApi;
+    private TestingApi testingApi;
 
     /**
      * Delete a single message.
@@ -123,6 +125,40 @@ public class Mailbox {
     }
 
     /**
+     * Set chaos testing.
+     *
+     */
+    public void setChaos(ChaosConfig chaosConfig) {
+        final TestingApi testingApi = getTestingApi();
+
+        try {
+            testingApi.setChaosParams(chaosConfig.getTriggers());
+        } catch (ApiException e) {
+            rethrow(e);
+        }
+    }
+
+    /**
+     * Disable chaos testing.
+     *
+     */
+    public void disableChaos() {
+        final TestingApi testingApi = getTestingApi();
+
+        try {
+            ChaosConfig chaosConfig = ChaosConfig.builder()
+                    .authentication(451, 0)
+                    .sender(451, 0)
+                    .recipient(451, 0)
+                    .build();
+
+            testingApi.setChaosParams(chaosConfig.getTriggers());
+        } catch (ApiException e) {
+            rethrow(e);
+        }
+    }
+
+    /**
      * Get application information
      * Returns basic runtime information, message totals and latest release version.
      *
@@ -150,6 +186,13 @@ public class Mailbox {
             this.applicationApi = new ApplicationApi(this.getApiClient());
         }
         return this.applicationApi;
+    }
+
+    public TestingApi getTestingApi() {
+        if (this.testingApi == null) {
+            this.testingApi = new TestingApi(this.getApiClient());
+        }
+        return this.testingApi;
     }
 
     public MessagesApi getMessagesApi() {

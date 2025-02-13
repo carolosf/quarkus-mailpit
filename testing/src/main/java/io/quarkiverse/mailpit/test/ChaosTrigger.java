@@ -36,7 +36,8 @@ public class ChaosTrigger {
 
     @Override
     public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
+        if (o == null || getClass() != o.getClass())
+            return false;
         ChaosTrigger that = (ChaosTrigger) o;
         return errorCode == that.errorCode && probability == that.probability;
     }

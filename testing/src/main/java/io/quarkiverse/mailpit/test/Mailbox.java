@@ -127,12 +127,14 @@ public class Mailbox {
     /**
      * Set chaos testing.
      *
+     * @param chaosConfig chaos configuration (required)
+     *
      */
     public void setChaos(ChaosConfig chaosConfig) {
         final TestingApi testingApi = getTestingApi();
 
         try {
-            testingApi.setChaosParams(chaosConfig.getTriggers());
+            testingApi.setChaosParams(convertChaosTriggers(chaosConfig.getChaosTriggers()));
         } catch (ApiException e) {
             rethrow(e);
         }
@@ -146,16 +148,38 @@ public class Mailbox {
         final TestingApi testingApi = getTestingApi();
 
         try {
-            ChaosConfig chaosConfig = ChaosConfig.builder()
-                    .authentication(451, 0)
-                    .sender(451, 0)
-                    .recipient(451, 0)
-                    .build();
-
-            testingApi.setChaosParams(chaosConfig.getTriggers());
+            ChaosConfig chaosConfig = ChaosConfig.builder().build();
+            testingApi.setChaosParams(convertChaosTriggers(chaosConfig.getChaosTriggers()));
         } catch (ApiException e) {
             rethrow(e);
         }
+    }
+
+    /**
+     * Converts an internal ChaosTrigger to the OpenAPI Trigger.
+     *
+     * @param chaosTrigger the internal representation
+     * @return the OpenAPI Trigger model
+     */
+    private Trigger convertTrigger(ChaosTrigger chaosTrigger) {
+        Trigger openApiTrigger = new Trigger();
+        openApiTrigger.setErrorCode((long) chaosTrigger.getErrorCode());
+        openApiTrigger.setProbability((long) chaosTrigger.getProbability());
+        return openApiTrigger;
+    }
+
+    /**
+     * Converts an internal ChaosTriggers to the OpenAPI Triggers.
+     *
+     * @param chaosTriggers the internal triggers
+     * @return the OpenAPI Triggers model
+     */
+    private Triggers convertChaosTriggers(ChaosTriggers chaosTriggers) {
+        Triggers openApiTriggers = new Triggers();
+        openApiTriggers.setAuthentication(convertTrigger(chaosTriggers.getAuthentication()));
+        openApiTriggers.setRecipient(convertTrigger(chaosTriggers.getRecipient()));
+        openApiTriggers.setSender(convertTrigger(chaosTriggers.getSender()));
+        return openApiTriggers;
     }
 
     /**

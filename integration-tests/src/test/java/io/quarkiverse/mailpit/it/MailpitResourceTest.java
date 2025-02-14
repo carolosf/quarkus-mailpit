@@ -142,6 +142,7 @@ public class MailpitResourceTest {
             if (StringUtils.isNotBlank((stack))) {
                 // native mode does not have the stack trace
                 assertThat(stack, containsStringIgnoringCase("sender address not accepted"));
+                assertThat(stack, containsStringIgnoringCase("451 Chaos sender error"));
             }
         } finally {
             mailbox.disableChaos();
@@ -154,7 +155,7 @@ public class MailpitResourceTest {
                 ChaosConfig.builder()
                         .authentication(451, 0)
                         .sender(451, 0)
-                        .recipient(451, 100)
+                        .recipient(550, 100)
                         .build());
 
         Response response = given()
@@ -170,6 +171,7 @@ public class MailpitResourceTest {
         if (StringUtils.isNotBlank((stack))) {
             // native mode does not have the stack trace
             assertThat(stack, containsStringIgnoringCase("recipient address not accepted"));
+            assertThat(stack, containsStringIgnoringCase("550 Chaos recipient error"));
         }
     }
 }
